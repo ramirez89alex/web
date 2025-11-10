@@ -21,12 +21,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"], 
-    deprecated="auto",
-    bcrypt__rounds=12,
-    bcrypt__truncate_error=True
-)
 security = HTTPBearer()
 
 # MongoDB connection
