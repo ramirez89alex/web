@@ -404,18 +404,22 @@ async def get_professionals(specialty: Optional[str] = None, location: Optional[
     
     result = []
     for prof_profile in professional_profiles:
+        # Remove MongoDB ObjectId and convert to dict
+        prof_profile_clean = {k: v for k, v in prof_profile.items() if k != "_id"}
+        
         # Get user data
-        user_data = await db.users.find_one({"id": prof_profile["user_id"]})
+        user_data = await db.users.find_one({"id": prof_profile_clean["user_id"]})
         if user_data:
-            # Remove hashed_password
-            user_data = {k: v for k, v in user_data.items() if k != "hashed_password"}
+            # Remove hashed_password and ObjectId
+            user_data_clean = {k: v for k, v in user_data.items() if k not in ["hashed_password", "_id"]}
+            
             # Combine user and profile data
-            combined = {**user_data, **prof_profile}
+            combined = {**user_data_clean, **prof_profile_clean}
             
             # Apply filters
-            if specialty and specialty not in prof_profile.get("specialties", []):
+            if specialty and specialty not in prof_profile_clean.get("specialties", []):
                 continue
-            if location and location.lower() not in user_data.get("location", "").lower():
+            if location and location.lower() not in user_data_clean.get("location", "").lower():
                 continue
                 
             result.append(combined)
