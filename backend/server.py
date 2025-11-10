@@ -431,16 +431,20 @@ async def get_professional(professional_id: str):
     # First try to find by user_id in professionals collection
     professional = await db.professionals.find_one({"user_id": professional_id})
     if professional:
+        # Remove MongoDB ObjectId
+        professional_clean = {k: v for k, v in professional.items() if k != "_id"}
+        
         # Get user data
         user_data = await db.users.find_one({"id": professional_id})
         if user_data:
-            user_data = {k: v for k, v in user_data.items() if k != "hashed_password"}
-            return {**user_data, **professional}
+            user_data_clean = {k: v for k, v in user_data.items() if k not in ["hashed_password", "_id"]}
+            return {**user_data_clean, **professional_clean}
     
     # Try to find by id in professionals collection (backward compatibility)
     professional = await db.professionals.find_one({"id": professional_id})
     if professional:
-        return professional
+        professional_clean = {k: v for k, v in professional.items() if k != "_id"}
+        return professional_clean
         
     raise HTTPException(status_code=404, detail="Professional not found")
 
