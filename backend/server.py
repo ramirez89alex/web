@@ -190,16 +190,14 @@ class StatusCheckCreate(BaseModel):
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
-    # Truncate password to 72 bytes for bcrypt compatibility
-    if isinstance(plain_password, str):
-        plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return pwd_context.verify(plain_password, hashed_password)
+    # Simple SHA256 hashing with salt
+    salted_password = plain_password + SECRET_KEY
+    return hashlib.sha256(salted_password.encode()).hexdigest() == hashed_password
 
 def get_password_hash(password):
-    # Truncate password to 72 bytes for bcrypt compatibility
-    if isinstance(password, str):
-        password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return pwd_context.hash(password)
+    # Simple SHA256 hashing with salt
+    salted_password = password + SECRET_KEY
+    return hashlib.sha256(salted_password.encode()).hexdigest()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
