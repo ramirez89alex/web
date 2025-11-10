@@ -455,15 +455,19 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
     if current_user.user_type == "professional":
         profile_data = await db.professionals.find_one({"user_id": current_user.id})
         if profile_data:
-            profile = {**current_user.dict(), **profile_data}
+            # Remove MongoDB ObjectId
+            profile_data_clean = {k: v for k, v in profile_data.items() if k != "_id"}
+            profile = {**current_user.dict(), **profile_data_clean}
     elif current_user.user_type == "company":
         profile_data = await db.companies.find_one({"user_id": current_user.id})
         if profile_data:
-            profile = {**current_user.dict(), **profile_data}
+            profile_data_clean = {k: v for k, v in profile_data.items() if k != "_id"}
+            profile = {**current_user.dict(), **profile_data_clean}
     elif current_user.user_type == "supplier":
         profile_data = await db.suppliers.find_one({"user_id": current_user.id})
         if profile_data:
-            profile = {**current_user.dict(), **profile_data}
+            profile_data_clean = {k: v for k, v in profile_data.items() if k != "_id"}
+            profile = {**current_user.dict(), **profile_data_clean}
     
     return profile or current_user.dict()
 
