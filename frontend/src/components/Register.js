@@ -12,9 +12,15 @@ import { useAuth } from '../App';
 import { Eye, EyeOff, Stethoscope, Building, Package, Plus, X } from 'lucide-react';
 
 const SPECIALTIES = [
-  "Ortopedia", "Columna", "Traumatología", "Cardiología", "Neurología",
-  "Anestesiología", "Cirugía General", "Ginecología", "Urología", "Oftalmología",
-  "Otorrinolaringología", "Dermatología", "Radiología", "Patología", "Medicina Interna"
+  "Ortopedia",
+  "Columna",
+  "Neurología",
+  "Cirugía General",
+  "Urología",
+  "Otorrinolaringología",
+  "Maxilofasial",
+  "Biologicos",
+  "laparoscopia y artroscopia"
 ];
 
 const COMPANY_TYPES = [
