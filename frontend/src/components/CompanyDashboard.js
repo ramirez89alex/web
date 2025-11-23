@@ -30,6 +30,7 @@ function CompanyDashboard() {
   const [profile, setProfile] = useState(null);
   const [professionals, setProfessionals] = useState([]);
   const [myReviews, setMyReviews] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +58,10 @@ function CompanyDashboard() {
         review => review.reviewer_user_id === user?.id
       );
       setMyReviews(companyReviews);
+
+      // Fetch sent service requests
+      const requestsRes = await axios.get(`${API}/service-requests/sent`, config);
+      setSentRequests(requestsRes.data);
       
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
