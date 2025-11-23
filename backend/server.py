@@ -471,6 +471,11 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
     
     return profile or current_user.dict()
 
+@api_router.get("/users/me")
+async def get_user_me(current_user: User = Depends(get_current_user)):
+    """Get current user profile with all related data based on user type"""
+    return await get_current_user_profile(current_user)
+
 @api_router.put("/professionals/me")
 async def update_user_profile(
     update_data: dict,
