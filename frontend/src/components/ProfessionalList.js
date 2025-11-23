@@ -431,20 +431,41 @@ function ProfessionalList() {
                             </div>
                           </div>
 
-                          {/* Contact Info */}
-                          <div>
-                            <Label className="text-sm font-medium text-gray-500 mb-2 block">Contacto</Label>
-                            <div className="space-y-2">
-                              <div className="flex items-center">
-                                <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                                <span className="text-sm">{professional.email}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                                <span className="text-sm">{professional.phone}</span>
+                          {/* Contact Info - Only visible for non-company users */}
+                          {user?.user_type !== 'company' && (
+                            <div>
+                              <Label className="text-sm font-medium text-gray-500 mb-2 block">Contacto</Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center">
+                                  <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                                  <span className="text-sm">{professional.email}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                                  <span className="text-sm">{professional.phone}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          )}
+                          
+                          {/* Service Request Button for Companies */}
+                          {user?.user_type === 'company' && (
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                              <p className="text-sm text-gray-600 mb-3">
+                                Para obtener los datos de contacto de este profesional, envía una solicitud de servicio.
+                              </p>
+                              <Button
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                onClick={() => {
+                                  setSelectedProfessional(professional);
+                                  setShowServiceRequestDialog(true);
+                                }}
+                              >
+                                <Briefcase className="h-4 w-4 mr-2" />
+                                Contratar Servicio
+                              </Button>
+                            </div>
+                          )}
 
                           {/* Specialties */}
                           <div>
