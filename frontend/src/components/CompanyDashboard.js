@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { useAuth } from '../App';
+import ServiceRequestFlow from './ServiceRequestFlow';
 import {
   Users,
   Star,
@@ -18,7 +19,9 @@ import {
   Search,
   MessageSquare,
   Plus,
-  Eye
+  Eye,
+  Bell,
+  CheckCircle
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
