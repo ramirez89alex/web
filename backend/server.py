@@ -589,6 +589,117 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Service Request routes
+@api_router.post("/service-requests", response_model=ServiceRequest)
+async def create_service_request(
+    request_data: ServiceRequestCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Company creates a service request to hire a professional"""
+    if current_user.user_type != "company":
+        raise HTTPException(
+            status_code=403,
+            detail="Only companies can create service requests"
+        )
+    
+    # Get company profile to include contact info
+    company_profile = await db.companies.find_one({"user_id": current_user.id})
+    if not company_profile:
+        raise HTTPException(status_code=404, detail="Company profile not found")
+    
+    service_request = ServiceRequest(
+        professional_id=request_data.professional_id,
+        company_id=current_user.id,
+        company_name=company_profile.get("company_name", current_user.full_name),
+        company_email=current_user.email,
+        company_phone=current_user.phone,
+        message=request_data.message,
+        service_type=request_data.service_type,
+        status="pending"
+    )
+    
+    await db.service_requests.insert_one(service_request.dict())
+    return service_request
+
+@api_router.get("/service-requests/received")
+async def get_received_service_requests(current_user: User = Depends(get_current_user)):
+    """Professional gets service requests sent to them"""
+    if current_user.user_type != "professional":
+        raise HTTPException(
+            status_code=403,
+            detail="Only professionals can view received service requests"
+        )
+    
+    requests = await db.service_requests.find(
+        {"professional_id": current_user.id}
+    ).sort("created_at", -1).to_list(100)
+    
+    requests_clean = [{k: v for k, v in req.items() if k != "_id"} for req in requests]
+    return requests_clean
+
+@api_router.get("/service-requests/sent")
+async def get_sent_service_requests(current_user: User = Depends(get_current_user)):
+    """Company gets service requests they have sent"""
+    if current_user.user_type != "company":
+        raise HTTPException(
+            status_code=403,
+            detail="Only companies can view sent service requests"
+        )
+    
+    requests = await db.service_requests.find(
+        {"company_id": current_user.id}
+    ).sort("created_at", -1).to_list(100)
+    
+    requests_clean = [{k: v for k, v in req.items() if k != "_id"} for req in requests]
+    return requests_clean
+
+@api_router.patch("/service-requests/{request_id}")
+async def update_service_request(
+    request_id: str,
+    update_data: ServiceRequestUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Professional approves or rejects a service request"""
+    if current_user.user_type != "professional":
+        raise HTTPException(
+            status_code=403,
+            detail="Only professionals can update service requests"
+        )
+    
+    service_request = await db.service_requests.find_one({"id": request_id})
+    if not service_request:
+        raise HTTPException(status_code=404, detail="Service request not found")
+    
+    if service_request["professional_id"] != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only update your own service requests"
+        )
+    
+    if update_data.status not in ["approved", "rejected"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Status must be 'approved' or 'rejected'"
+        )
+    
+    result = await db.service_requests.update_one(
+        {"id": request_id},
+        {
+            "$set": {
+                "status": update_data.status,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Service request not found")
+    
+    updated_request = await db.service_requests.find_one({"id": request_id})
+    updated_request_clean = {k: v for k, v in updated_request.items() if k != "_id"}
+    
+    return updated_request_clean
+
 # Include the router in the main app
 app.include_router(api_router)
 
