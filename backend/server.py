@@ -148,6 +148,27 @@ class ReviewCreate(BaseModel):
     rating: int = Field(ge=1, le=5)
     comment: str
     collaboration_type: Optional[str] = None
+
+class ServiceRequest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    professional_id: str
+    company_id: str
+    company_name: str
+    company_email: str
+    company_phone: str
+    status: str = "pending"  # pending, approved, rejected
+    message: str = ""
+    service_type: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ServiceRequestCreate(BaseModel):
+    professional_id: str
+    message: str = ""
+    service_type: Optional[str] = None
+
+class ServiceRequestUpdate(BaseModel):
+    status: str  # approved or rejected
     date_of_service: Optional[datetime] = None
 
 class MatchRequest(BaseModel):
