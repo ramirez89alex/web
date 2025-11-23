@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from '../App';
 import ProfessionalDashboard from './ProfessionalDashboard';
 import CompanyDashboard from './CompanyDashboard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import {
+  Users,
+  Star,
+  Clock,
+  MapPin,
+  Briefcase,
+  TrendingUp,
+  Eye,
+  MessageSquare,
+  Plus,
+  Filter
+} from 'lucide-react';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 function Dashboard() {
   const { user } = useAuth();
