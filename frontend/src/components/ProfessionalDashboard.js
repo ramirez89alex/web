@@ -462,6 +462,99 @@ function ProfessionalDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Service Requests History */}
+        {serviceRequests.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Historial de Solicitudes</CardTitle>
+              <CardDescription>
+                Todas las solicitudes de servicio recibidas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {serviceRequests.map((request) => (
+                  <div key={request.id} className="p-4 border rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-green-600 text-white">
+                            {request.company_name?.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-gray-900">{request.company_name}</p>
+                          {request.service_type && (
+                            <Badge variant="secondary" className="text-xs mt-1">
+                              {request.service_type}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <Badge
+                        className={
+                          request.status === 'approved'
+                            ? 'bg-green-100 text-green-800'
+                            : request.status === 'rejected'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }
+                      >
+                        {request.status === 'approved' && 'Aprobada'}
+                        {request.status === 'rejected' && 'Rechazada'}
+                        {request.status === 'pending' && 'Pendiente'}
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-2">{request.message}</p>
+                    
+                    {request.status === 'approved' && (
+                      <div className="mt-3 p-3 bg-green-50 rounded border border-green-200">
+                        <p className="text-sm font-medium text-green-900 mb-2">
+                          <Building className="h-4 w-4 inline mr-1" />
+                          Datos de contacto:
+                        </p>
+                        <div className="space-y-1 text-sm text-green-800">
+                          <p className="flex items-center">
+                            <Mail className="h-3 w-3 mr-2" />
+                            {request.company_email}
+                          </p>
+                          <p className="flex items-center">
+                            <Phone className="h-3 w-3 mr-2" />
+                            {request.company_phone}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => handleServiceRequest(request.id, 'approved')}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Aprobar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          onClick={() => handleServiceRequest(request.id, 'rejected')}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Rechazar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
