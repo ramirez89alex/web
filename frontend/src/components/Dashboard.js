@@ -1,26 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import React from 'react';
 import { useAuth } from '../App';
-import {
-  Users,
-  Star,
-  Clock,
-  MapPin,
-  Briefcase,
-  TrendingUp,
-  Eye,
-  MessageSquare,
-  Plus,
-  Filter
-} from 'lucide-react';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import ProfessionalDashboard from './ProfessionalDashboard';
+import CompanyDashboard from './CompanyDashboard';
 
 function Dashboard() {
+  const { user } = useAuth();
+
+  // Redirect to specific dashboard based on user type
+  if (user?.user_type === 'professional') {
+    return <ProfessionalDashboard />;
+  }
+
+  if (user?.user_type === 'company') {
+    return <CompanyDashboard />;
+  }
+
+  // Default fallback for suppliers or unknown user types
+  return <DefaultDashboard />;
+}
+
+function DefaultDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState({
     totalProfessionals: 0,
