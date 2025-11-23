@@ -69,6 +69,12 @@ function ProfessionalList() {
     reviewer_name: user?.full_name || ''
   });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [showServiceRequestDialog, setShowServiceRequestDialog] = useState(false);
+  const [serviceRequestData, setServiceRequestData] = useState({
+    message: '',
+    service_type: ''
+  });
+  const [submittingServiceRequest, setSubmittingServiceRequest] = useState(false);
 
   useEffect(() => {
     fetchProfessionals();
