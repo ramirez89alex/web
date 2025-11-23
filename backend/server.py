@@ -171,6 +171,87 @@ class ServiceRequestUpdate(BaseModel):
     status: str  # approved or rejected
     date_of_service: Optional[datetime] = None
 
+class Payment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    service_request_id: str
+    company_id: str
+    professional_id: str
+    amount: float
+    status: str = "pending"  # pending, completed, refunded, in_dispute
+    payment_method: str = "simulated"
+    transaction_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PaymentCreate(BaseModel):
+    service_request_id: str
+    amount: float
+    payment_method: str = "simulated"
+
+class ServiceDetails(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    service_request_id: str
+    payment_id: str
+    date_time: str  # fecha y hora del servicio
+    location: str  # lugar/dirección
+    access_authorization: str  # autorización de ingreso
+    surgeon_name: str  # médico encargado
+    operating_room: str  # número de quirófano
+    estimated_duration: str  # tiempo aproximado
+    additional_notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ServiceDetailsCreate(BaseModel):
+    service_request_id: str
+    date_time: str
+    location: str
+    access_authorization: str
+    surgeon_name: str
+    operating_room: str
+    estimated_duration: str
+    additional_notes: Optional[str] = None
+
+class ServiceCompletion(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    service_request_id: str
+    professional_id: str
+    arrival_confirmed: bool = False
+    arrival_photo_url: Optional[str] = None
+    arrival_time: Optional[datetime] = None
+    company_confirmed: bool = False
+    company_confirmation_time: Optional[datetime] = None
+    status: str = "pending"  # pending, completed, disputed
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ArrivalConfirmation(BaseModel):
+    arrival_photo_url: Optional[str] = None
+
+class CompanyConfirmation(BaseModel):
+    confirmed: bool
+    notes: Optional[str] = None
+
+class Dispute(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    service_request_id: str
+    payment_id: str
+    reported_by: str  # user_id who reported
+    reporter_type: str  # company or professional
+    reason: str  # no_show, incomplete_service, other
+    description: str
+    status: str = "open"  # open, under_review, resolved
+    resolution: Optional[str] = None  # full_refund, partial_refund, no_refund, professional_blocked
+    refund_amount: Optional[float] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    resolved_at: Optional[datetime] = None
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DisputeCreate(BaseModel):
+    service_request_id: str
+    reason: str
+    description: str
+
 class MatchRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     requester_user_id: str  # Company requesting professionals
