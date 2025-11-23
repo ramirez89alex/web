@@ -249,6 +249,78 @@ function ProfessionalDashboard() {
           </CardContent>
         </Card>
 
+        {/* Service Requests Notifications */}
+        {serviceRequests.filter(req => req.status === 'pending').length > 0 && (
+          <Card className="mb-8 border-blue-500 border-2">
+            <CardHeader className="bg-blue-50">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-blue-600 animate-pulse" />
+                <CardTitle className="text-blue-900">
+                  Nuevas Solicitudes de Servicio ({serviceRequests.filter(req => req.status === 'pending').length})
+                </CardTitle>
+              </div>
+              <CardDescription>
+                Empresas interesadas en contratar tus servicios
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {serviceRequests
+                  .filter(req => req.status === 'pending')
+                  .slice(0, 3)
+                  .map((request) => (
+                    <div key={request.id} className="p-4 border rounded-lg bg-white">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-green-600 text-white">
+                              {request.company_name?.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold text-gray-900">{request.company_name}</p>
+                            {request.service_type && (
+                              <Badge variant="secondary" className="mt-1">
+                                {request.service_type}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                          Pendiente
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 mb-4 bg-gray-50 p-3 rounded">
+                        {request.message}
+                      </p>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          onClick={() => handleServiceRequest(request.id, 'approved')}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Aprobar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
+                          onClick={() => handleServiceRequest(request.id, 'rejected')}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Rechazar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
