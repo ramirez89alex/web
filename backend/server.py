@@ -781,6 +781,247 @@ async def update_service_request(
     
     return updated_request_clean
 
+# Payment routes
+@api_router.post("/payments", response_model=Payment)
+async def create_payment(
+    payment_data: PaymentCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Company makes a payment (simulated) for an approved service request"""
+    if current_user.user_type != "company":
+        raise HTTPException(status_code=403, detail="Only companies can make payments")
+    
+    # Verify service request exists and is approved
+    service_request = await db.service_requests.find_one({"id": payment_data.service_request_id})
+    if not service_request:
+        raise HTTPException(status_code=404, detail="Service request not found")
+    
+    if service_request["status"] != "approved":
+        raise HTTPException(status_code=400, detail="Service request must be approved first")
+    
+    # Create simulated payment
+    payment = Payment(
+        service_request_id=payment_data.service_request_id,
+        company_id=current_user.id,
+        professional_id=service_request["professional_id"],
+        amount=payment_data.amount,
+        status="completed",  # Simulated payment is instant
+        payment_method=payment_data.payment_method,
+        transaction_id=f"SIM-{uuid.uuid4().hex[:12].upper()}"
+    )
+    
+    await db.payments.insert_one(payment.dict())
+    
+    return payment
+
+@api_router.get("/payments/by-request/{request_id}")
+async def get_payment_by_request(
+    request_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get payment for a service request"""
+    payment = await db.payments.find_one({"service_request_id": request_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    payment_clean = {k: v for k, v in payment.items() if k != "_id"}
+    return payment_clean
+
+# Service Details routes
+@api_router.post("/service-details", response_model=ServiceDetails)
+async def create_service_details(
+    details_data: ServiceDetailsCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Company sends service details after payment"""
+    if current_user.user_type != "company":
+        raise HTTPException(status_code=403, detail="Only companies can send service details")
+    
+    # Verify payment exists and is completed
+    payment = await db.payments.find_one({"service_request_id": details_data.service_request_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found for this service request")
+    
+    if payment["status"] != "completed":
+        raise HTTPException(status_code=400, detail="Payment must be completed first")
+    
+    service_details = ServiceDetails(
+        service_request_id=details_data.service_request_id,
+        payment_id=payment["id"],
+        date_time=details_data.date_time,
+        location=details_data.location,
+        access_authorization=details_data.access_authorization,
+        surgeon_name=details_data.surgeon_name,
+        operating_room=details_data.operating_room,
+        estimated_duration=details_data.estimated_duration,
+        additional_notes=details_data.additional_notes
+    )
+    
+    await db.service_details.insert_one(service_details.dict())
+    
+    # Create service completion record
+    service_completion = ServiceCompletion(
+        service_request_id=details_data.service_request_id,
+        professional_id=payment["professional_id"]
+    )
+    await db.service_completions.insert_one(service_completion.dict())
+    
+    return service_details
+
+@api_router.get("/service-details/by-request/{request_id}")
+async def get_service_details(
+    request_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get service details for a service request"""
+    details = await db.service_details.find_one({"service_request_id": request_id})
+    if not details:
+        raise HTTPException(status_code=404, detail="Service details not found")
+    
+    details_clean = {k: v for k, v in details.items() if k != "_id"}
+    return details_clean
+
+# Service Completion routes
+@api_router.get("/service-completions/professional")
+async def get_professional_completions(current_user: User = Depends(get_current_user)):
+    """Professional gets their service completions"""
+    if current_user.user_type != "professional":
+        raise HTTPException(status_code=403, detail="Only professionals can view their completions")
+    
+    completions = await db.service_completions.find(
+        {"professional_id": current_user.id}
+    ).to_list(100)
+    
+    completions_clean = [{k: v for k, v in c.items() if k != "_id"} for c in completions]
+    return completions_clean
+
+@api_router.patch("/service-completions/{request_id}/arrival")
+async def confirm_arrival(
+    request_id: str,
+    arrival_data: ArrivalConfirmation,
+    current_user: User = Depends(get_current_user)
+):
+    """Professional confirms arrival at service location"""
+    if current_user.user_type != "professional":
+        raise HTTPException(status_code=403, detail="Only professionals can confirm arrival")
+    
+    result = await db.service_completions.update_one(
+        {"service_request_id": request_id, "professional_id": current_user.id},
+        {
+            "$set": {
+                "arrival_confirmed": True,
+                "arrival_photo_url": arrival_data.arrival_photo_url,
+                "arrival_time": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Service completion not found")
+    
+    updated = await db.service_completions.find_one({"service_request_id": request_id})
+    updated_clean = {k: v for k, v in updated.items() if k != "_id"}
+    
+    return updated_clean
+
+@api_router.patch("/service-completions/{request_id}/company-confirm")
+async def company_confirm_completion(
+    request_id: str,
+    confirmation_data: CompanyConfirmation,
+    current_user: User = Depends(get_current_user)
+):
+    """Company confirms service was completed satisfactorily"""
+    if current_user.user_type != "company":
+        raise HTTPException(status_code=403, detail="Only companies can confirm completion")
+    
+    completion = await db.service_completions.find_one({"service_request_id": request_id})
+    if not completion:
+        raise HTTPException(status_code=404, detail="Service completion not found")
+    
+    if not completion["arrival_confirmed"]:
+        raise HTTPException(status_code=400, detail="Professional must confirm arrival first")
+    
+    # Update completion
+    result = await db.service_completions.update_one(
+        {"service_request_id": request_id},
+        {
+            "$set": {
+                "company_confirmed": confirmation_data.confirmed,
+                "company_confirmation_time": datetime.now(timezone.utc),
+                "status": "completed" if confirmation_data.confirmed else "pending",
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    # If confirmed, release payment
+    if confirmation_data.confirmed:
+        await db.payments.update_one(
+            {"service_request_id": request_id},
+            {"$set": {"status": "released", "updated_at": datetime.now(timezone.utc)}}
+        )
+    
+    updated = await db.service_completions.find_one({"service_request_id": request_id})
+    updated_clean = {k: v for k, v in updated.items() if k != "_id"}
+    
+    return updated_clean
+
+# Dispute routes
+@api_router.post("/disputes", response_model=Dispute)
+async def create_dispute(
+    dispute_data: DisputeCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a dispute for a service"""
+    # Get payment for this service
+    payment = await db.payments.find_one({"service_request_id": dispute_data.service_request_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    dispute = Dispute(
+        service_request_id=dispute_data.service_request_id,
+        payment_id=payment["id"],
+        reported_by=current_user.id,
+        reporter_type=current_user.user_type,
+        reason=dispute_data.reason,
+        description=dispute_data.description,
+        status="open"
+    )
+    
+    await db.disputes.insert_one(dispute.dict())
+    
+    # Update payment status
+    await db.payments.update_one(
+        {"id": payment["id"]},
+        {"$set": {"status": "in_dispute", "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return dispute
+
+@api_router.get("/disputes")
+async def get_disputes(current_user: User = Depends(get_current_user)):
+    """Get disputes (for admin/support)"""
+    disputes = await db.disputes.find().to_list(100)
+    disputes_clean = [{k: v for k, v in d.items() if k != "_id"} for d in disputes]
+    return disputes_clean
+
+@api_router.get("/disputes/my-requests")
+async def get_my_request_disputes(current_user: User = Depends(get_current_user)):
+    """Get disputes related to user's service requests"""
+    # Get all service requests involving this user
+    if current_user.user_type == "professional":
+        requests = await db.service_requests.find({"professional_id": current_user.id}).to_list(100)
+    else:
+        requests = await db.service_requests.find({"company_id": current_user.id}).to_list(100)
+    
+    request_ids = [r["id"] for r in requests]
+    
+    disputes = await db.disputes.find({"service_request_id": {"$in": request_ids}}).to_list(100)
+    disputes_clean = [{k: v for k, v in d.items() if k != "_id"} for d in disputes]
+    
+    return disputes_clean
+
 # Include the router in the main app
 app.include_router(api_router)
 
