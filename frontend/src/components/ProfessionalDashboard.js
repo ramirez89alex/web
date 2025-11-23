@@ -27,6 +27,7 @@ function ProfessionalDashboard() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [serviceRequests, setServiceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingAvailability, setEditingAvailability] = useState(false);
   const [newAvailability, setNewAvailability] = useState('available');
@@ -53,6 +54,10 @@ function ProfessionalDashboard() {
         review => review.reviewed_user_id === user?.id
       );
       setReviews(myReviews);
+
+      // Fetch service requests
+      const serviceRequestsRes = await axios.get(`${API}/service-requests/received`, config);
+      setServiceRequests(serviceRequestsRes.data);
       
     } catch (error) {
       console.error('Error fetching profile data:', error);
