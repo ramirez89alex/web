@@ -47,13 +47,15 @@ function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await axios.post(`${API}/auth/login`, { email, password });
-      const { access_token, professional } = response.data;
+      const { access_token, user, profile } = response.data;
       
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
       setToken(access_token);
-      setUser(professional);
+      // Merge user and profile data
+      const userData = profile ? { ...user, ...profile } : user;
+      setUser(userData);
       
       toast.success('¡Bienvenido de vuelta!');
       return { success: true };
