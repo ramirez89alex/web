@@ -86,6 +86,29 @@ function ProfessionalDashboard() {
     }
   };
 
+  const handleServiceRequest = async (requestId, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(
+        `${API}/service-requests/${requestId}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success(
+        status === 'approved' 
+          ? 'Solicitud aprobada. La empresa ahora puede contactarte.'
+          : 'Solicitud rechazada.'
+      );
+      
+      // Refresh service requests
+      fetchProfileData();
+    } catch (error) {
+      console.error('Error updating service request:', error);
+      toast.error('Error al actualizar la solicitud');
+    }
+  };
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
