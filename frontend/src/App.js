@@ -29,7 +29,7 @@ function AuthProvider({ children }) {
       if (savedToken) {
         try {
           axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
-          const response = await axios.get(`${API}/professionals/me`);
+          const response = await axios.get(`${API}/users/me`);
           setUser(response.data);
           setToken(savedToken);
         } catch (error) {
