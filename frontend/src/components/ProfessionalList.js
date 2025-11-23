@@ -169,6 +169,43 @@ function ProfessionalList() {
     }
   };
 
+  const handleSubmitServiceRequest = async () => {
+    if (!selectedProfessional || !serviceRequestData.message.trim()) {
+      toast.error('Por favor escribe un mensaje describiendo el servicio que necesitas');
+      return;
+    }
+
+    setSubmittingServiceRequest(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API}/service-requests`,
+        {
+          professional_id: selectedProfessional.user_id || selectedProfessional.id,
+          message: serviceRequestData.message,
+          service_type: serviceRequestData.service_type
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      toast.success('Solicitud enviada correctamente. El profesional será notificado.');
+      setShowServiceRequestDialog(false);
+      setServiceRequestData({
+        message: '',
+        service_type: ''
+      });
+    } catch (error) {
+      console.error('Error submitting service request:', error);
+      const message = error.response?.data?.detail || 'Error al enviar la solicitud';
+      toast.error(message);
+    } finally {
+      setSubmittingServiceRequest(false);
+    }
+  };
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
