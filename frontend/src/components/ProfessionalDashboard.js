@@ -6,6 +6,7 @@ import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAuth } from '../App';
+import { toast } from 'sonner';
 import {
   Star,
   Clock,
@@ -17,7 +18,11 @@ import {
   DollarSign,
   MessageSquare,
   TrendingUp,
-  Edit
+  Edit,
+  Bell,
+  CheckCircle,
+  XCircle,
+  Building
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
