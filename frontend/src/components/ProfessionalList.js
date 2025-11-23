@@ -40,9 +40,15 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const SPECIALTIES = [
-  "Ortopedia", "Columna", "Traumatología", "Cardiología", "Neurología",
-  "Anestesiología", "Cirugía General", "Ginecología", "Urología", "Oftalmología",
-  "Otorrinolaringología", "Dermatología", "Radiología", "Patología", "Medicina Interna"
+  "Ortopedia",
+  "Columna",
+  "Neurología",
+  "Cirugía General",
+  "Urología",
+  "Otorrinolaringología",
+  "Maxilofasial",
+  "Biologicos",
+  "laparoscopia y artroscopia"
 ];
 
 function ProfessionalList() {
