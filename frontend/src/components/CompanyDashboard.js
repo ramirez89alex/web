@@ -246,6 +246,36 @@ function CompanyDashboard() {
           </CardContent>
         </Card>
 
+        {/* Approved Requests - Payment & Details Flow */}
+        {sentRequests.filter(req => req.status === 'approved').length > 0 && (
+          <Card className="mb-8 border-green-500 border-2">
+            <CardHeader className="bg-green-50">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-green-600 animate-pulse" />
+                <CardTitle className="text-green-900">
+                  Solicitudes Aprobadas ({sentRequests.filter(req => req.status === 'approved').length})
+                </CardTitle>
+              </div>
+              <CardDescription>
+                Procede con el pago y envía los detalles del servicio
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {sentRequests
+                  .filter(req => req.status === 'approved')
+                  .map((request) => (
+                    <ServiceRequestFlow 
+                      key={request.id} 
+                      request={request} 
+                      onUpdate={fetchDashboardData}
+                    />
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Top Professionals */}
           <Card>
