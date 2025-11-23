@@ -69,13 +69,15 @@ function AuthProvider({ children }) {
   const register = async (userData) => {
     try {
       const response = await axios.post(`${API}/auth/register`, userData);
-      const { access_token, professional } = response.data;
+      const { access_token, user, profile } = response.data;
       
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
       setToken(access_token);
-      setUser(professional);
+      // Merge user and profile data
+      const mergedUserData = profile ? { ...user, ...profile } : user;
+      setUser(mergedUserData);
       
       toast.success('¡Registro exitoso! Bienvenido a la plataforma.');
       return { success: true };
