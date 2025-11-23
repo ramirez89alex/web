@@ -709,6 +709,70 @@ function ProfessionalList() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Service Request Dialog */}
+        <Dialog open={showServiceRequestDialog} onOpenChange={setShowServiceRequestDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Solicitar Servicio</DialogTitle>
+              <DialogDescription>
+                Envía una solicitud a {selectedProfessional?.full_name} para contratar sus servicios
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tipo de servicio</Label>
+                <Input
+                  value={serviceRequestData.service_type}
+                  onChange={(e) => setServiceRequestData({...serviceRequestData, service_type: e.target.value})}
+                  placeholder="Ej: Cirugía de ortopedia, Consulta especializada, etc."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Mensaje</Label>
+                <Textarea
+                  value={serviceRequestData.message}
+                  onChange={(e) => setServiceRequestData({...serviceRequestData, message: e.target.value})}
+                  placeholder="Describe el servicio que necesitas y cualquier detalle relevante..."
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <p className="text-sm text-gray-700">
+                  <strong>Nota:</strong> El profesional recibirá tu solicitud y podrá aprobarla o rechazarla. 
+                  Si es aprobada, recibirás los datos de contacto para coordinar el servicio.
+                </p>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowServiceRequestDialog(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSubmitServiceRequest}
+                  disabled={submittingServiceRequest || !serviceRequestData.message.trim()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {submittingServiceRequest ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Enviando...
+                    </div>
+                  ) : (
+                    'Enviar Solicitud'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
