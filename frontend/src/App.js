@@ -186,7 +186,7 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Navigation />
-                <ProfessionalProfile />
+                <MyProfile />
               </ProtectedRoute>
             } />
             <Route path="/professionals" element={
