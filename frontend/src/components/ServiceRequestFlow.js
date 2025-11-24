@@ -61,25 +61,24 @@ function ServiceRequestFlow({ request, onUpdate }) {
   const fetchPaymentAndDetails = async () => {
     try {
       const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const config = { 
+        headers: { Authorization: `Bearer ${token}` },
+        validateStatus: (status) => status < 500 // Don't throw on 404
+      };
 
       // Try to fetch payment
-      try {
-        const paymentRes = await axios.get(`${API}/payments/by-request/${request.id}`, config);
+      const paymentRes = await axios.get(`${API}/payments/by-request/${request.id}`, config);
+      if (paymentRes.status === 200) {
         setPayment(paymentRes.data);
 
         // If payment exists, try to fetch service details
-        try {
-          const detailsRes = await axios.get(`${API}/service-details/by-request/${request.id}`, config);
+        const detailsRes = await axios.get(`${API}/service-details/by-request/${request.id}`, config);
+        if (detailsRes.status === 200) {
           setServiceDetails(detailsRes.data);
-        } catch (err) {
-          // Details not yet created
         }
-      } catch (err) {
-        // Payment not yet created
       }
     } catch (error) {
-      console.error('Error fetching payment/details:', error);
+      // Silently handle errors - this is expected when payment/details don't exist yet
     }
   };
 
