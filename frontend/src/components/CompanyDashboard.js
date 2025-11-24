@@ -35,14 +35,23 @@ function CompanyDashboard() {
   const [myReviews, setMyReviews] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchDashboardData();
+    if (user) {
+      fetchDashboardData();
+    }
   }, [user]);
 
   const fetchDashboardData = async () => {
     try {
+      setError(null);
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+      
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
@@ -63,11 +72,16 @@ function CompanyDashboard() {
       setMyReviews(companyReviews);
 
       // Fetch sent service requests
-      const requestsRes = await axios.get(`${API}/service-requests/sent`, config);
-      setSentRequests(requestsRes.data);
+      try {
+        const requestsRes = await axios.get(`${API}/service-requests/sent`, config);
+        setSentRequests(requestsRes.data);
+      } catch (err) {
+        console.log('Could not fetch sent requests:', err);
+      }
       
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError(error.response?.data?.detail || error.message || 'Error al cargar el perfil');
     } finally {
       setLoading(false);
     }
