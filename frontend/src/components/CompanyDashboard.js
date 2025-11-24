@@ -123,6 +123,40 @@ function CompanyDashboard() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-red-100 p-3 rounded-full">
+                  <Building className="h-8 w-8 text-red-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-semibold text-red-900 text-center mb-2">
+                Error al cargar el perfil
+              </h2>
+              <p className="text-sm text-red-700 text-center mb-4">
+                {error}
+              </p>
+              <Button
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  fetchDashboardData();
+                }}
+                className="w-full bg-red-600 hover:bg-red-700"
+              >
+                Intentar de nuevo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
