@@ -162,14 +162,25 @@ function Navigation() {
                   </Link>
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  <span>Mensajes</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/messages" className="flex items-center">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <span>Mensajes</span>
+                  </Link>
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configuración</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/notifications" className="flex items-center">
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>Notificaciones</span>
+                  </Link>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Configuración</span>
+                  </Link>
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
