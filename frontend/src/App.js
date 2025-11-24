@@ -11,6 +11,9 @@ import Dashboard from './components/Dashboard';
 import ProfessionalProfile from './components/ProfessionalProfile';
 import ProfessionalList from './components/ProfessionalList';
 import Navigation from './components/Navigation';
+import Messages from './components/Messages';
+import Settings from './components/Settings';
+import Notifications from './components/Notifications';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
