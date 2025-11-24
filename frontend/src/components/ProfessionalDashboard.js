@@ -34,16 +34,25 @@ function ProfessionalDashboard() {
   const [reviews, setReviews] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editingAvailability, setEditingAvailability] = useState(false);
   const [newAvailability, setNewAvailability] = useState('available');
 
   useEffect(() => {
-    fetchProfileData();
+    if (user) {
+      fetchProfileData();
+    }
   }, [user]);
 
   const fetchProfileData = async () => {
     try {
+      setError(null);
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+      
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
@@ -61,11 +70,18 @@ function ProfessionalDashboard() {
       setReviews(myReviews);
 
       // Fetch service requests
-      const serviceRequestsRes = await axios.get(`${API}/service-requests/received`, config);
-      setServiceRequests(serviceRequestsRes.data);
+      try {
+        const serviceRequestsRes = await axios.get(`${API}/service-requests/received`, config);
+        setServiceRequests(serviceRequestsRes.data);
+      } catch (err) {
+        // Service requests might fail if user is not a professional, ignore
+        console.log('Could not fetch service requests:', err);
+      }
       
     } catch (error) {
       console.error('Error fetching profile data:', error);
+      setError(error.response?.data?.detail || error.message || 'Error al cargar el perfil');
+      toast.error('Error al cargar el perfil. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
