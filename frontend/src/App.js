@@ -194,6 +194,24 @@ function App() {
                 <ProfessionalList />
               </ProtectedRoute>
             } />
+            <Route path="/messages" element={
+              <ProtectedRoute>
+                <Navigation />
+                <Messages />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Navigation />
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <Navigation />
+                <Notifications />
+              </ProtectedRoute>
+            } />
             
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
