@@ -14,6 +14,7 @@ import Navigation from './components/Navigation';
 import Messages from './components/Messages';
 import Settings from './components/Settings';
 import Notifications from './components/Notifications';
+import MyProfile from './components/MyProfile';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
